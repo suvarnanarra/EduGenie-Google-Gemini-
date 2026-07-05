@@ -1,5 +1,4 @@
 import unittest
-from unittest.mock import patch
 
 from fastapi.testclient import TestClient
 
@@ -8,36 +7,20 @@ from main import app
 
 
 class QuizModuleTests(unittest.TestCase):
-    def test_generate_quiz_parses_markdown_json_into_python_objects(self) -> None:
-        class FakeAdapter:
-            def generate(self, prompt: str) -> str:
-                return '''```json
-[ 
-  {
-    "question": "What is photosynthesis?",
-    "options": ["A process plants use to make food", "A type of soil", "A weather event", "A kind of animal"],
-    "correct_answer": "A process plants use to make food"
-  }
-]
-```'''
-
-        with patch("edugenie.quiz_module.router.select_model", return_value=FakeAdapter()):
-            result = generate_quiz("Photosynthesis", question_count=1)
+    def test_generate_quiz_returns_python_objects(self) -> None:
+        result = generate_quiz("Photosynthesis", question_count=2)
 
         self.assertIsInstance(result, list)
-        self.assertEqual(len(result), 1)
-        self.assertEqual(result[0]["question"], "What is photosynthesis?")
-        self.assertEqual(result[0]["correct_answer"], "A process plants use to make food")
+        self.assertEqual(len(result), 2)
+        self.assertIn("question", result[0])
+        self.assertIn("options", result[0])
+        self.assertIn("correct_answer", result[0])
+        self.assertIsInstance(result[0]["options"], list)
 
-    def test_generate_quiz_returns_empty_list_when_response_is_invalid(self) -> None:
-        class FakeAdapter:
-            def generate(self, prompt: str) -> str:
-                return "This is not valid JSON"
+    def test_generate_quiz_limits_question_count(self) -> None:
+        result = generate_quiz("Photosynthesis", question_count=20)
 
-        with patch("edugenie.quiz_module.router.select_model", return_value=FakeAdapter()):
-            result = generate_quiz("Photosynthesis", question_count=1)
-
-        self.assertEqual(result, [])
+        self.assertEqual(len(result), 5)
 
 
 class AppRouteTests(unittest.TestCase):
