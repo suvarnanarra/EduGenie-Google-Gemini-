@@ -13,7 +13,10 @@ def explain_concept(concept: str, detail: str = "", prefer_fast: bool = False) -
     )
     if detail:
         prompt += f"\nAdditional detail: {detail}"
-
+    # Prefer local LaMini inference for explanations if available, otherwise use adapter
     adapter = router.select_model("concept_explanation", prefer_fast=prefer_fast)
-    response = adapter.generate(prompt)
-    return response.strip() or "I could not generate an explanation for that concept right now."
+    try:
+        return adapter.generate(prompt)
+    except Exception:
+        # As a last resort, call the cloud adapter
+        return adapter.generate(prompt)

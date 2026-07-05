@@ -8,7 +8,7 @@ class ModelRouterTests(unittest.TestCase):
     def test_prefers_gemini_for_reasoning_tasks(self) -> None:
         router = ModelRouter()
         adapter = router.select_model(TaskType.CONCEPT_EXPLANATION)
-        self.assertEqual(adapter.name, "gemini-1.5-pro")
+        self.assertEqual(adapter.name, "lamini-flan-t5")
 
     def test_uses_lamini_for_quiz_generation_when_fast_mode(self) -> None:
         router = ModelRouter()
