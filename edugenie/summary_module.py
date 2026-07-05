@@ -6,6 +6,11 @@ router = ModelRouter()
 
 
 def summarize_text(text: str, prefer_fast: bool = False) -> str:
-    prompt = f"Summarize the following text in a clear and concise way:\n{text}"
+    prompt = (
+        "You are an educational summarizer. Create a clear, concise summary while preserving the main ideas. "
+        "Keep it easy to understand and avoid unnecessary repetition.\n\n"
+        f"Text to summarize:\n{text}"
+    )
     adapter = router.select_model("summarization", prefer_fast=prefer_fast)
-    return adapter.generate(prompt)
+    response = adapter.generate(prompt)
+    return response.strip() or "I could not generate a summary for that text right now."
