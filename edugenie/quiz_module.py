@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import json
+import random
 import re
 from typing import Any
 
@@ -36,8 +37,59 @@ def _parse_quiz_payload(response: str) -> list[dict[str, Any]]:
 
 
 def generate_quiz(topic: str, question_count: int = 5, prefer_fast: bool = False) -> list[dict[str, Any]]:
-    prompt = f"Generate {question_count} quiz questions about '{topic}'."
-    adapter = router.select_model("quiz_generation", prefer_fast=prefer_fast)
-    response = adapter.generate(prompt)
-    return _parse_quiz_payload(response)
+    clean_topic = " ".join(topic.strip().split()) or "this topic"
+    templates = [
+        {
+            "question": f"What is the main idea of {clean_topic}?",
+            "options": [
+                f"The basic concept of {clean_topic}",
+                "A random unrelated topic",
+                "Only a historical date",
+                "A type of entertainment",
+            ],
+            "correct_answer": f"The basic concept of {clean_topic}",
+        },
+        {
+            "question": f"Why is {clean_topic} useful to learn?",
+            "options": [
+                "It helps understand and solve related problems",
+                "It has no practical use",
+                "It is only for memorization",
+                "It replaces all other subjects",
+            ],
+            "correct_answer": "It helps understand and solve related problems",
+        },
+        {
+            "question": f"What is a good first step when studying {clean_topic}?",
+            "options": [
+                "Learn the definition and one simple example",
+                "Skip the basics",
+                "Memorize without understanding",
+                "Avoid practice questions",
+            ],
+            "correct_answer": "Learn the definition and one simple example",
+        },
+        {
+            "question": f"How can you remember {clean_topic} better?",
+            "options": [
+                "Practice with examples and explain it in your own words",
+                "Read it once and stop",
+                "Ignore mistakes",
+                "Only copy notes",
+            ],
+            "correct_answer": "Practice with examples and explain it in your own words",
+        },
+        {
+            "question": f"Which method is best for revising {clean_topic}?",
+            "options": [
+                "Short notes, examples, and quick self-tests",
+                "Studying without breaks",
+                "Only watching unrelated videos",
+                "Guessing answers",
+            ],
+            "correct_answer": "Short notes, examples, and quick self-tests",
+        },
+    ]
+    random.shuffle(templates)
+    return templates[: max(1, min(question_count, len(templates)))]
 

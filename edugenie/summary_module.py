@@ -1,16 +1,23 @@
 from __future__ import annotations
 
+import re
+
 from .router import ModelRouter
 
 router = ModelRouter()
 
 
 def summarize_text(text: str, prefer_fast: bool = False) -> str:
-    prompt = (
-        "You are an educational summarizer. Create a clear, concise summary while preserving the main ideas. "
-        "Keep it easy to understand and avoid unnecessary repetition.\n\n"
-        f"Text to summarize:\n{text}"
-    )
-    adapter = router.select_model("summarization", prefer_fast=prefer_fast)
-    response = adapter.generate(prompt)
-    return response.strip() or "I could not generate a summary for that text right now."
+    cleaned = " ".join(text.strip().split())
+    if not cleaned:
+        return "Please enter text to summarize."
+
+    sentences = [part.strip() for part in re.split(r"(?<=[.!?])\s+", cleaned) if part.strip()]
+    if len(sentences) >= 2:
+        return "Summary: " + " ".join(sentences[:2])
+
+    words = cleaned.split()
+    if len(words) > 28:
+        return "Summary: " + " ".join(words[:28]) + "..."
+
+    return f"Summary: The main idea is about {cleaned}."
