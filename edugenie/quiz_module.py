@@ -8,32 +8,36 @@ from .router import ModelRouter
 
 router = ModelRouter()
 
+def _parse_quiz_payload(response: str) -> list[dict[str, Any]]:
+    if not response:
+        return []
 
-def _clean_json_block(response: str) -> str:
     cleaned = response.strip()
     if cleaned.startswith("```"):
-        cleaned = re.sub(r"^```(?:json)?\s*", "", cleaned)
-        cleaned = re.sub(r"\s*```$", "", cleaned)
-    return cleaned.strip()
+        cleaned = re.sub(r"^```(?:json|javascript|python)?\s*", "", cleaned)
+        cleaned = re.sub(r"\s*```$", "", cleaned).strip()
+
+    try:
+        parsed = json.loads(cleaned)
+    except json.JSONDecodeError:
+        match = re.search(r"(\[.*\]|\{.*\})", cleaned, re.DOTALL)
+        if not match:
+            return []
+        try:
+            parsed = json.loads(match.group(1))
+        except json.JSONDecodeError:
+            return []
+
+    if isinstance(parsed, list):
+        return [item for item in parsed if isinstance(item, dict)]
+    if isinstance(parsed, dict):
+        return [parsed]
+    return []
 
 
 def generate_quiz(topic: str, question_count: int = 5, prefer_fast: bool = False) -> list[dict[str, Any]]:
-    prompt = (
-        f"Generate {question_count} multiple-choice quiz questions about '{topic}'. "
-        "Return valid JSON as a Python list of objects. Each object must include: "
-        "'question' (string), 'options' (a list of 4 strings), and 'correct_answer' (string)."
-    )
+    prompt = f"Generate {question_count} quiz questions about '{topic}'."
     adapter = router.select_model("quiz_generation", prefer_fast=prefer_fast)
     response = adapter.generate(prompt)
+    return _parse_quiz_payload(response)
 
-    try:
-        cleaned = _clean_json_block(response)
-        data = json.loads(cleaned)
-        if isinstance(data, dict):
-            data = [data]
-        if isinstance(data, list):
-            return [item for item in data if isinstance(item, dict)]
-    except (TypeError, ValueError, json.JSONDecodeError):
-        pass
-
-    return []

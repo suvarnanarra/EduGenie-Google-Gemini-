@@ -2,7 +2,12 @@ from __future__ import annotations
 
 from typing import Any
 
+from __future__ import annotations
+
+from typing import Any
+
 from .config import TaskType
+from .google_adapter import get_google_response
 
 
 class BaseModelAdapter:
@@ -11,7 +16,7 @@ class BaseModelAdapter:
         self.model_id = model_id
 
     def generate(self, prompt: str, **_: Any) -> str:
-        return f"{self.name} generated response for: {prompt}"
+        return get_google_response(prompt, model_id=self.model_id)
 
 
 class GeminiAdapter(BaseModelAdapter):
