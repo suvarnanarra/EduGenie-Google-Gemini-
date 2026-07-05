@@ -1,0 +1,190 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Welcome to EduGenie</title>
+    <link rel="stylesheet" href="/static/style.css" />
+  </head>
+  <body>
+    <div class="page-shell">
+      <header class="page-hero">
+        <h1>Welcome to EduGenie <span>🧠✨</span></h1>
+        <p>EduGenie Learning Assistant — your personal AI tutor for learning support!</p>
+      </header>
+
+      <main class="task-panel">
+        <section class="task-card">
+          <div class="task-head">
+            <h2>Ask EduGenie a Question:</h2>
+          </div>
+          <form id="qaForm" class="task-form">
+            <input id="qaInput" class="task-input" type="text" placeholder="Why is the sky blue?" aria-label="Ask a question" />
+            <button type="submit" class="task-button">Get Answer</button>
+          </form>
+          <div id="qaResult" class="task-result">
+            <div class="result-title">Answer:</div>
+            <div id="qaText" class="result-text">The answer will appear here once you submit a question.</div>
+          </div>
+        </section>
+
+        <section class="task-card">
+          <div class="task-head">
+            <h2>Need an Explanation?</h2>
+          </div>
+          <form id="explainForm" class="task-form">
+            <input id="explainInput" class="task-input" type="text" placeholder="Photosynthesis" aria-label="Explain a concept" />
+            <button type="submit" class="task-button">Explain</button>
+          </form>
+          <div id="explainResult" class="task-result">
+            <div class="result-title">Explanation:</div>
+            <div id="explainText" class="result-text">A concept explanation will show here.</div>
+          </div>
+        </section>
+
+        <section class="task-card">
+          <div class="task-head">
+            <h2>Summarize a Paragraph:</h2>
+          </div>
+          <form id="summaryForm" class="task-form">
+            <input id="summaryInput" class="task-input" type="text" placeholder="Paste long content to summarize" aria-label="Summarize text" />
+            <button type="submit" class="task-button">Summarize</button>
+          </form>
+          <div id="summaryResult" class="task-result">
+            <div class="result-title">Summary:</div>
+            <div id="summaryText" class="result-text">The summary will be displayed here.</div>
+          </div>
+        </section>
+
+        <section class="task-card">
+          <div class="task-head">
+            <h2>Generate a Quiz:</h2>
+          </div>
+          <form id="quizForm" class="task-form">
+            <input id="quizInput" class="task-input" type="text" placeholder="Pythagoras theorem" aria-label="Generate quiz topic" />
+            <button type="submit" class="task-button">Generate Quiz</button>
+          </form>
+          <div id="quizResult" class="task-result">
+            <div class="result-title">Quiz:</div>
+            <div id="quizText" class="result-text">A quiz will be displayed here.</div>
+          </div>
+        </section>
+
+        <section class="task-card">
+          <div class="task-head">
+            <h2>Get Learning Recommendations:</h2>
+          </div>
+          <form id="recommendForm" class="task-form">
+            <input id="recommendInput" class="task-input" type="text" placeholder="e.g. Linear Regression" aria-label="Learning recommendations topic" />
+            <button type="submit" class="task-button">Get Recommendations</button>
+          </form>
+          <div id="recommendResult" class="task-result">
+            <div class="result-title">Learning Recommendations:</div>
+            <div id="recommendText" class="result-text">Personalized learning guidance will appear here.</div>
+          </div>
+        </section>
+      </main>
+
+      <footer class="page-footer">
+        <p>Fig. EduGenie — a refined learning interface with clear, student-ready study tools.</p>
+      </footer>
+    </div>
+
+    <script>
+      const qaForm = document.getElementById('qaForm');
+      const explainForm = document.getElementById('explainForm');
+      const summaryForm = document.getElementById('summaryForm');
+      const quizForm = document.getElementById('quizForm');
+      const recommendForm = document.getElementById('recommendForm');
+
+      const qaInput = document.getElementById('qaInput');
+      const explainInput = document.getElementById('explainInput');
+      const summaryInput = document.getElementById('summaryInput');
+      const quizInput = document.getElementById('quizInput');
+      const recommendInput = document.getElementById('recommendInput');
+
+      const qaText = document.getElementById('qaText');
+      const explainText = document.getElementById('explainText');
+      const summaryText = document.getElementById('summaryText');
+      const quizText = document.getElementById('quizText');
+      const recommendText = document.getElementById('recommendText');
+
+      const safeText = (text) => text ? text.toString() : '';
+
+      const postJson = async (url, payload) => {
+        const response = await fetch(url, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(payload)
+        });
+        return response.ok ? response.json() : { error: 'Unable to retrieve response.' };
+      };
+
+      qaForm.addEventListener('submit', async (event) => {
+        event.preventDefault();
+        qaText.textContent = 'Loading answer...';
+        const value = qaInput.value.trim();
+        if (!value) {
+          qaText.textContent = 'Please enter a question first.';
+          return;
+        }
+        const data = await postJson('/qa', { question: value });
+        qaText.textContent = safeText(data.answer || data.error || 'No answer returned.');
+      });
+
+      explainForm.addEventListener('submit', async (event) => {
+        event.preventDefault();
+        explainText.textContent = 'Loading explanation...';
+        const value = explainInput.value.trim();
+        if (!value) {
+          explainText.textContent = 'Please enter a concept first.';
+          return;
+        }
+        const data = await postJson('/explain', { concept: value });
+        explainText.textContent = safeText(data.explanation || data.error || 'No explanation returned.');
+      });
+
+      summaryForm.addEventListener('submit', async (event) => {
+        event.preventDefault();
+        summaryText.textContent = 'Loading summary...';
+        const value = summaryInput.value.trim();
+        if (!value) {
+          summaryText.textContent = 'Please enter text to summarize first.';
+          return;
+        }
+        const data = await postJson('/summarize', { text: value });
+        summaryText.textContent = safeText(data.summary || data.error || 'No summary returned.');
+      });
+
+      quizForm.addEventListener('submit', async (event) => {
+        event.preventDefault();
+        quizText.textContent = 'Loading quiz...';
+        const value = quizInput.value.trim();
+        if (!value) {
+          quizText.textContent = 'Please enter a topic first.';
+          return;
+        }
+        const data = await postJson('/quiz', { topic: value, question_count: 4 });
+        if (data.quiz && Array.isArray(data.quiz)) {
+          quizText.innerHTML = data.quiz
+            .map((item, index) => `<div class="quiz-item"><strong>Q${index + 1}:</strong> ${safeText(item.question)}<div class="quiz-options">${(item.options || []).map(option => `<div class="quiz-option">• ${safeText(option)}</div>`).join('')}</div></div>`)
+            .join('');
+        } else {
+          quizText.textContent = safeText(data.error || 'No quiz returned.');
+        }
+      });
+
+      recommendForm.addEventListener('submit', async (event) => {
+        event.preventDefault();
+        recommendText.textContent = 'Loading recommendations...';
+        const value = recommendInput.value.trim();
+        if (!value) {
+          recommendText.textContent = 'Please enter a topic first.';
+          return;
+        }
+        const data = await postJson('/learn/recommendations', { topic: value, level: 'beginner' });
+        recommendText.textContent = safeText(data.recommendations || data.error || 'No recommendations returned.');
+      });
+    </script>
+  </body>
+</html>
