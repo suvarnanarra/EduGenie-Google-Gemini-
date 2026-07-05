@@ -2,10 +2,6 @@ from __future__ import annotations
 
 from typing import Any
 
-from __future__ import annotations
-
-from typing import Any
-
 from .config import TaskType
 from .google_adapter import get_google_response
 
